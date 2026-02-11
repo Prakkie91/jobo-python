@@ -59,6 +59,10 @@ include = ["jobo_enterprise*"]
 target-version = "py39"
 line-length = 120
 
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+testpaths = ["tests"]
+
 [tool.mypy]
 python_version = "3.9"
 strict = true
