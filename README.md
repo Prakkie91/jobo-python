@@ -1,19 +1,13 @@
-<p align="center">
-  <img src="https://raw.githubusercontent.com/Prakkie91/jobo-python/main/jobo-logo.png" alt="Jobo" width="120" />
-</p>
+<img src="https://raw.githubusercontent.com/Prakkie91/jobo-python/main/jobo-logo.png" alt="Jobo" width="120" />
 
-<h1 align="center">Jobo Enterprise — Python Client</h1>
+# Jobo Enterprise — Python Client
 
-<p align="center">
-  <strong>Access millions of job listings from 45+ ATS platforms with a single API.</strong><br/>
-  Build job boards, power job aggregators, or sync ATS data — Greenhouse, Lever, Workday, iCIMS, and more.
-</p>
+**Access millions of job listings from 45+ ATS platforms with a single API.**  
+Build job boards, power job aggregators, or sync ATS data — Greenhouse, Lever, Workday, iCIMS, and more.
 
-<p align="center">
-  <a href="https://pypi.org/project/jobo-enterprise/"><img src="https://img.shields.io/pypi/v/jobo-enterprise" alt="PyPI" /></a>
-  <a href="https://pypi.org/project/jobo-enterprise/"><img src="https://img.shields.io/pypi/pyversions/jobo-enterprise" alt="Python" /></a>
-  <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-blue.svg" alt="License: MIT" /></a>
-</p>
+[![PyPI](https://img.shields.io/pypi/v/jobo-enterprise)](https://pypi.org/project/jobo-enterprise/)
+[![Python](https://img.shields.io/pypi/pyversions/jobo-enterprise)](https://pypi.org/project/jobo-enterprise/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
 ---
 
