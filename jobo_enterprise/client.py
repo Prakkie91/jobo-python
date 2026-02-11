@@ -25,7 +25,7 @@ from jobo_enterprise.models import (
     LocationFilter,
 )
 
-_DEFAULT_BASE_URL = "https://api.jobo.ai"
+_DEFAULT_BASE_URL = "https://jobs-api.jobo.world"
 _DEFAULT_TIMEOUT = 30.0
 _USER_AGENT = "jobo-python/1.0.0"
 
@@ -65,7 +65,7 @@ class JoboClient:
 
     Args:
         api_key: Your Jobo Enterprise API key.
-        base_url: API base URL. Defaults to ``https://api.jobo.ai``.
+        base_url: API base URL. Defaults to ``https://jobs-api.jobo.world``.
         timeout: Request timeout in seconds. Defaults to 30.
         httpx_client: Optional pre-configured ``httpx.Client`` instance.
     """
@@ -342,7 +342,7 @@ class AsyncJoboClient:
 
     Args:
         api_key: Your Jobo Enterprise API key.
-        base_url: API base URL. Defaults to ``https://api.jobo.ai``.
+        base_url: API base URL. Defaults to ``https://jobs-api.jobo.world``.
         timeout: Request timeout in seconds. Defaults to 30.
         httpx_client: Optional pre-configured ``httpx.AsyncClient`` instance.
     """

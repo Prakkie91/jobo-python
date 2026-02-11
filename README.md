@@ -1,10 +1,36 @@
-# Jobo Enterprise Python Client
+<p align="center">
+  <img src="https://raw.githubusercontent.com/Prakkie91/jobo-python/main/jobo-logo.png" alt="Jobo" width="120" />
+</p>
 
-Official Python client library for the [Jobo Enterprise Jobs API](https://api.jobo.ai). Access millions of job listings from 15+ ATS platforms including Greenhouse, Lever, Workday, SmartRecruiters, and more.
+<h1 align="center">Jobo Enterprise — Python Client</h1>
 
-[![PyPI](https://img.shields.io/pypi/v/jobo-enterprise)](https://pypi.org/project/jobo-enterprise/)
-[![Python](https://img.shields.io/pypi/pyversions/jobo-enterprise)](https://pypi.org/project/jobo-enterprise/)
-[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+<p align="center">
+  <strong>Access millions of job listings from 45+ ATS platforms with a single API.</strong><br/>
+  Build job boards, power job aggregators, or sync ATS data — Greenhouse, Lever, Workday, iCIMS, and more.
+</p>
+
+<p align="center">
+  <a href="https://pypi.org/project/jobo-enterprise/"><img src="https://img.shields.io/pypi/v/jobo-enterprise" alt="PyPI" /></a>
+  <a href="https://pypi.org/project/jobo-enterprise/"><img src="https://img.shields.io/pypi/pyversions/jobo-enterprise" alt="Python" /></a>
+  <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-blue.svg" alt="License: MIT" /></a>
+</p>
+
+---
+
+## Why Jobo Enterprise?
+
+- **45+ ATS integrations** — Greenhouse, Lever, Workday, iCIMS, SmartRecruiters, BambooHR, Ashby, and many more
+- **Bulk feed endpoint** — Cursor-based pagination to sync millions of jobs efficiently
+- **Real-time search** — Full-text search with location, remote, and source filters
+- **Expired job sync** — Keep your job board fresh by removing stale listings
+- **Sync + Async** — Both `JoboClient` and `AsyncJoboClient` included
+- **Fully typed** — Pydantic models with complete type annotations
+
+> **Get your API key** → [enterprise.jobo.world/api-keys](https://enterprise.jobo.world/api-keys)
+>
+> **Learn more** → [jobo.world/enterprise](https://jobo.world/enterprise/)
+
+---
 
 ## Installation
 
@@ -19,31 +45,32 @@ from jobo_enterprise import JoboClient
 
 client = JoboClient(api_key="your-api-key")
 
-# Search for jobs
-results = client.search_jobs(q="software engineer", location="San Francisco")
+# Search for software engineering jobs from Greenhouse
+results = client.search_jobs(
+    q="software engineer",
+    location="San Francisco",
+    sources="greenhouse,lever",
+)
+
 for job in results.jobs:
-    print(f"{job.title} at {job.company.name}")
+    print(f"{job.title} at {job.company.name} — {job.listing_url}")
 ```
 
 ## Authentication
 
-All API requests require an API key passed via the `X-Api-Key` header. The client handles this automatically:
+Get your API key at **[enterprise.jobo.world/api-keys](https://enterprise.jobo.world/api-keys)**.
+
+All requests require an API key passed via the `X-Api-Key` header. The client handles this automatically:
 
 ```python
 client = JoboClient(api_key="your-api-key")
 ```
 
-You can also configure the base URL for self-hosted deployments:
-
-```python
-client = JoboClient(api_key="your-api-key", base_url="https://your-instance.example.com")
-```
-
 ## Usage
 
-### Job Search (Simple)
+### Search Jobs (Simple)
 
-Search jobs with simple query parameters:
+Search jobs with query parameters — ideal for building job board search pages:
 
 ```python
 from jobo_enterprise import JoboClient
@@ -63,7 +90,7 @@ with JoboClient(api_key="your-api-key") as client:
         print(f"  {job.title} at {job.company.name} — {job.listing_url}")
 ```
 
-### Job Search (Advanced)
+### Search Jobs (Advanced)
 
 Use the advanced endpoint for multiple queries and locations:
 
@@ -90,9 +117,9 @@ for job in client.iter_search_jobs(
     print(f"{job.title} — {job.company.name}")
 ```
 
-### Jobs Feed (Bulk)
+### Bulk Jobs Feed
 
-Fetch large batches of active jobs using cursor-based pagination:
+Fetch large batches of active jobs using cursor-based pagination — perfect for building a job aggregator or syncing to your database:
 
 ```python
 from jobo_enterprise import JoboClient, LocationFilter
@@ -124,12 +151,12 @@ Stream all jobs without managing cursors:
 
 ```python
 for job in client.iter_jobs_feed(batch_size=1000, sources=["greenhouse"]):
-    process_job(job)
+    save_to_database(job)
 ```
 
 ### Expired Job IDs
 
-Sync expired jobs to keep your data fresh:
+Keep your job board fresh by syncing expired listings:
 
 ```python
 from datetime import datetime, timedelta
@@ -142,7 +169,7 @@ for job_id in client.iter_expired_job_ids(expired_since=expired_since):
 
 ## Async Support
 
-Every method has an async equivalent:
+Every method has an async equivalent via `AsyncJoboClient`:
 
 ```python
 import asyncio
@@ -183,7 +210,7 @@ from jobo_enterprise import (
 try:
     results = client.search_jobs(q="engineer")
 except JoboAuthenticationError:
-    print("Invalid API key")
+    print("Invalid API key — get one at https://enterprise.jobo.world/api-keys")
 except JoboRateLimitError as e:
     print(f"Rate limited. Retry after {e.retry_after}s")
 except JoboValidationError as e:
@@ -209,27 +236,41 @@ All response data is returned as typed Pydantic models:
 | `ExpiredJobIdsResponse` | Expired job IDs with cursor pagination |
 | `JobSearchResponse` | Search response with page-based pagination |
 
-## Supported Sources
+## Supported ATS Sources (45+)
+
+Filter jobs by any of these applicant tracking systems:
 
 | Category | Sources |
 |---|---|
-| **Tech/Startup** | `greenhouse`, `lever`, `ashby`, `workable`, `rippling`, `polymer` |
-| **Enterprise** | `workday`, `smartrecruiters` |
-| **SMB** | `bamboohr`, `breezy`, `jazzhr`, `recruitee`, `personio` |
+| **Enterprise ATS** | `workday`, `smartrecruiters`, `icims`, `successfactors`, `oraclecloud`, `taleo`, `dayforce`, `csod` (Cornerstone), `adp`, `ultipro`, `paycom` |
+| **Tech & Startup** | `greenhouse`, `lever_co`, `ashby`, `workable`, `workable_jobs`, `rippling`, `polymer`, `gem`, `pinpoint`, `homerun` |
+| **Mid-Market** | `bamboohr`, `breezy`, `jazzhr`, `recruitee`, `personio`, `jobvite`, `teamtailor`, `comeet`, `trakstar`, `zoho` |
+| **SMB & Niche** | `gohire`, `recooty`, `applicantpro`, `hiringthing`, `careerplug`, `hirehive`, `kula`, `careerpuck`, `talnet`, `jobscore` |
+| **Specialized** | `freshteam`, `isolved`, `joincom`, `eightfold`, `phenompeople` (via `eightfold`) |
+
+> Pass source identifiers in the `sources` parameter, e.g. `sources=["greenhouse", "lever_co", "workday"]`
 
 ## Configuration
 
 | Parameter | Default | Description |
 |---|---|---|
-| `api_key` | *required* | Your Jobo Enterprise API key |
-| `base_url` | `https://api.jobo.ai` | API base URL |
+| `api_key` | *required* | Your Jobo Enterprise API key ([get one here](https://enterprise.jobo.world/api-keys)) |
+| `base_url` | `https://jobs-api.jobo.world` | API base URL |
 | `timeout` | `30.0` | Request timeout in seconds |
 | `httpx_client` | `None` | Custom `httpx.Client` / `httpx.AsyncClient` |
+
+## Use Cases
+
+- **Build a job board** — Search and display jobs from 45+ ATS platforms
+- **Job aggregator** — Bulk-sync millions of listings with the feed endpoint
+- **ATS data pipeline** — Pull jobs from Greenhouse, Lever, Workday, etc. into your data warehouse
+- **Recruitment tools** — Power candidate-facing job search experiences
+- **Market research** — Analyze hiring trends across companies and industries
 
 ## Development
 
 ```bash
-git clone https://github.com/jobo-ai/jobo-python.git
+git clone https://github.com/Prakkie91/jobo-python.git
 cd jobo-python
 pip install -e ".[dev]"
 
@@ -240,6 +281,42 @@ pytest
 ruff check .
 mypy jobo_enterprise
 ```
+
+## Publishing to PyPI
+
+```bash
+# Install build tools
+pip install build twine
+
+# Build the package
+python -m build
+
+# Upload to PyPI
+twine upload dist/*
+
+# Push tags to GitHub
+git tag v$(python -c "from jobo_enterprise import __version__; print(__version__)")
+git push origin main --tags
+```
+
+## Pushing to GitHub
+
+```bash
+# Initial setup (one-time)
+git remote set-url origin https://github.com/Prakkie91/jobo-python.git
+
+# Push
+git add -A
+git commit -m "release: v$(python -c 'from jobo_enterprise import __version__; print(__version__)')"
+git push origin main
+```
+
+## Links
+
+- **Website** — [jobo.world/enterprise](https://jobo.world/enterprise/)
+- **Get API Key** — [enterprise.jobo.world/api-keys](https://enterprise.jobo.world/api-keys)
+- **GitHub** — [github.com/Prakkie91/jobo-python](https://github.com/Prakkie91/jobo-python)
+- **PyPI** — [pypi.org/project/jobo-enterprise](https://pypi.org/project/jobo-enterprise/)
 
 ## License
 

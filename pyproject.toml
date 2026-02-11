@@ -5,14 +5,20 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "jobo-enterprise"
 version = "1.0.0"
-description = "Official Python client for the Jobo Enterprise Jobs API"
+description = "Official Python client for the Jobo Enterprise Jobs API. Access millions of job listings from 45+ ATS platforms — Greenhouse, Lever, Workday, iCIMS, SmartRecruiters, and more. Build job boards, aggregators, and recruitment tools."
 readme = "README.md"
 license = { text = "MIT" }
 requires-python = ">=3.9"
 authors = [
-    { name = "Jobo AI", email = "support@jobo.ai" }
+    { name = "Jobo", email = "support@jobo.world" }
 ]
-keywords = ["jobo", "jobs", "api", "enterprise", "job-board", "recruitment"]
+keywords = [
+    "jobo", "jobs", "api", "enterprise", "job-board", "recruitment",
+    "ats", "greenhouse", "lever", "workday", "smartrecruiters", "ashby",
+    "bamboohr", "icims", "job-scraper", "job-listings", "job-data",
+    "job-aggregator", "job-feed", "applicant-tracking-system", "hiring",
+    "careers-page", "job-search-api", "bulk-jobs",
+]
 classifiers = [
     "Development Status :: 5 - Production/Stable",
     "Intended Audience :: Developers",
@@ -41,10 +47,10 @@ dev = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/jobo-ai/jobo-python"
-Documentation = "https://github.com/jobo-ai/jobo-python#readme"
-Repository = "https://github.com/jobo-ai/jobo-python"
-Issues = "https://github.com/jobo-ai/jobo-python/issues"
+Homepage = "https://jobo.world/enterprise/"
+Documentation = "https://github.com/Prakkie91/jobo-python#readme"
+Repository = "https://github.com/Prakkie91/jobo-python"
+Issues = "https://github.com/Prakkie91/jobo-python/issues"
 
 [tool.setuptools.packages.find]
 include = ["jobo_enterprise*"]
