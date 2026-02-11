@@ -84,7 +84,7 @@ class TestSyncFeed:
 class TestSyncExpired:
     def test_get_expired_job_ids_returns_response(self, client: JoboClient):
         response = client.get_expired_job_ids(
-            expired_since=datetime.now(timezone.utc) - timedelta(days=7),
+            expired_since=datetime.now(timezone.utc) - timedelta(days=6),
             batch_size=5,
         )
 
@@ -205,7 +205,7 @@ class TestAsyncClient:
 
     async def test_get_expired_job_ids(self, async_client: AsyncJoboClient):
         response = await async_client.get_expired_job_ids(
-            expired_since=datetime.now(timezone.utc) - timedelta(days=7),
+            expired_since=datetime.now(timezone.utc) - timedelta(days=6),
             batch_size=5,
         )
 
