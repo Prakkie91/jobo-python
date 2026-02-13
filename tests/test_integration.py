@@ -27,7 +27,7 @@ requires_api_key = pytest.mark.skipif(not API_KEY, reason="JOBO_API_KEY not set"
 @requires_api_key
 class TestSyncFeed:
     def test_get_jobs_feed_returns_jobs(self, client: JoboClient):
-        response = client.get_jobs_feed(batch_size=5)
+        response = client.feed.get_jobs(batch_size=5)
 
         assert response is not None
         assert len(response.jobs) > 0
@@ -45,7 +45,7 @@ class TestSyncFeed:
     def test_get_jobs_feed_with_location_filter(self, client: JoboClient):
         from jobo_enterprise.models import LocationFilter
 
-        response = client.get_jobs_feed(
+        response = client.feed.get_jobs(
             locations=[LocationFilter(country="US")],
             batch_size=5,
         )
@@ -54,7 +54,7 @@ class TestSyncFeed:
         assert len(response.jobs) > 0
 
     def test_get_jobs_feed_pagination(self, client: JoboClient):
-        first = client.get_jobs_feed(batch_size=2)
+        first = client.feed.get_jobs(batch_size=2)
         assert len(first.jobs) > 0
 
         if not first.has_more:
@@ -62,14 +62,14 @@ class TestSyncFeed:
 
         assert first.next_cursor
 
-        second = client.get_jobs_feed(cursor=first.next_cursor, batch_size=2)
+        second = client.feed.get_jobs(cursor=first.next_cursor, batch_size=2)
         assert second is not None
         assert len(second.jobs) > 0
         assert second.jobs[0].id != first.jobs[0].id
 
     def test_iter_jobs_feed_yields_jobs(self, client: JoboClient):
         jobs: list[Job] = []
-        for job in client.iter_jobs_feed(batch_size=3):
+        for job in client.feed.iter_jobs(batch_size=3):
             jobs.append(job)
             if len(jobs) >= 5:
                 break
@@ -83,7 +83,7 @@ class TestSyncFeed:
 @requires_api_key
 class TestSyncExpired:
     def test_get_expired_job_ids_returns_response(self, client: JoboClient):
-        response = client.get_expired_job_ids(
+        response = client.feed.get_expired_job_ids(
             expired_since=datetime.now(timezone.utc) - timedelta(days=6),
             batch_size=5,
         )
@@ -98,7 +98,7 @@ class TestSyncExpired:
 @requires_api_key
 class TestSyncSearch:
     def test_search_jobs_returns_results(self, client: JoboClient):
-        response = client.search_jobs(q="software engineer", page_size=5)
+        response = client.search.search(q="software engineer", page_size=5)
 
         assert response is not None
         assert len(response.jobs) > 0
@@ -107,7 +107,7 @@ class TestSyncSearch:
         assert response.page == 1
 
     def test_search_jobs_advanced_returns_results(self, client: JoboClient):
-        response = client.search_jobs_advanced(
+        response = client.search.search_advanced(
             queries=["data engineer"],
             page_size=5,
         )
@@ -117,7 +117,7 @@ class TestSyncSearch:
         assert response.total > 0
 
     def test_search_jobs_advanced_with_location(self, client: JoboClient):
-        response = client.search_jobs_advanced(
+        response = client.search.search_advanced(
             queries=["developer"],
             locations=["New York"],
             page_size=5,
@@ -128,7 +128,7 @@ class TestSyncSearch:
 
     def test_iter_search_jobs_yields_jobs(self, client: JoboClient):
         jobs: list[Job] = []
-        for job in client.iter_search_jobs(queries=["engineer"], page_size=3):
+        for job in client.search.iter_jobs(queries=["engineer"], page_size=3):
             jobs.append(job)
             if len(jobs) >= 5:
                 break
@@ -142,7 +142,7 @@ class TestSyncSearch:
 @requires_api_key
 class TestSyncJobModel:
     def test_job_has_expected_fields(self, client: JoboClient):
-        response = client.search_jobs(q="engineer", page_size=1)
+        response = client.search.search(q="engineer", page_size=1)
         assert len(response.jobs) > 0
 
         job = response.jobs[0]
@@ -168,7 +168,7 @@ class TestSyncJobModel:
 @requires_api_key
 class TestSyncGeocoding:
     def test_geocode_returns_location(self, client: JoboClient):
-        result = client.geocode("San Francisco, CA")
+        result = client.locations.geocode("San Francisco, CA")
 
         assert result is not None
         assert result.input == "San Francisco, CA"
@@ -180,20 +180,21 @@ class TestSyncGeocoding:
         assert location.longitude is not None
 
     def test_geocode_with_invalid_location(self, client: JoboClient):
-        result = client.geocode("invalidlocationxyz123")
+        result = client.locations.geocode("invalidlocationxyz123")
 
         assert result is not None
         # May succeed with remote keyword parsing or fail - just check response
 
 
-# ── Sync client: AutoApply ─────────────────────────────────────────────
+# ── Sync client: AutoApply (disabled – not yet implemented) ─────────────
 
 
 @requires_api_key
+@pytest.mark.skip(reason="Auto Apply is not yet implemented")
 class TestSyncAutoApply:
     def test_start_auto_apply_session_with_invalid_url(self, client: JoboClient):
         # Using an invalid URL should return a response
-        response = client.start_auto_apply_session("https://invalid-url-that-does-not-exist.com/jobs/123")
+        response = client.auto_apply.start_session("https://invalid-url-that-does-not-exist.com/jobs/123")
 
         assert response is not None
         # The provider detection may fail or succeed - just check response structure
@@ -202,7 +203,7 @@ class TestSyncAutoApply:
     def test_end_auto_apply_session_with_invalid_session(self, client: JoboClient):
         from uuid import uuid4
 
-        result = client.end_auto_apply_session(uuid4())
+        result = client.auto_apply.end_session(uuid4())
 
         # Should return false for non-existent session
         assert result is False
@@ -215,7 +216,7 @@ class TestSyncAutoApply:
 @pytest.mark.asyncio
 class TestAsyncClient:
     async def test_get_jobs_feed(self, async_client: AsyncJoboClient):
-        response = await async_client.get_jobs_feed(batch_size=5)
+        response = await async_client.feed.get_jobs(batch_size=5)
 
         assert response is not None
         assert len(response.jobs) > 0
@@ -225,14 +226,14 @@ class TestAsyncClient:
         assert job.title
 
     async def test_search_jobs(self, async_client: AsyncJoboClient):
-        response = await async_client.search_jobs(q="engineer", page_size=5)
+        response = await async_client.search.search(q="engineer", page_size=5)
 
         assert response is not None
         assert len(response.jobs) > 0
         assert response.total > 0
 
     async def test_search_jobs_advanced(self, async_client: AsyncJoboClient):
-        response = await async_client.search_jobs_advanced(
+        response = await async_client.search.search_advanced(
             queries=["developer"],
             page_size=5,
         )
@@ -242,7 +243,7 @@ class TestAsyncClient:
 
     async def test_iter_jobs_feed(self, async_client: AsyncJoboClient):
         jobs: list[Job] = []
-        async for job in async_client.iter_jobs_feed(batch_size=3):
+        async for job in async_client.feed.iter_jobs(batch_size=3):
             jobs.append(job)
             if len(jobs) >= 5:
                 break
@@ -250,7 +251,7 @@ class TestAsyncClient:
         assert len(jobs) > 0
 
     async def test_get_expired_job_ids(self, async_client: AsyncJoboClient):
-        response = await async_client.get_expired_job_ids(
+        response = await async_client.feed.get_expired_job_ids(
             expired_since=datetime.now(timezone.utc) - timedelta(days=6),
             batch_size=5,
         )
@@ -266,13 +267,13 @@ class TestErrorHandling:
     def test_invalid_api_key_raises_authentication_error(self):
         with JoboClient(api_key="invalid-key-12345", base_url=BASE_URL) as bad_client:
             with pytest.raises(JoboAuthenticationError):
-                bad_client.get_jobs_feed(batch_size=1)
+                bad_client.feed.get_jobs(batch_size=1)
 
     @pytest.mark.asyncio
     async def test_invalid_api_key_raises_authentication_error_async(self):
         bad_client = AsyncJoboClient(api_key="invalid-key-12345", base_url=BASE_URL)
         try:
             with pytest.raises(JoboAuthenticationError):
-                await bad_client.get_jobs_feed(batch_size=1)
+                await bad_client.feed.get_jobs(batch_size=1)
         finally:
             await bad_client.close()
