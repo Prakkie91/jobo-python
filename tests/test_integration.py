@@ -162,6 +162,52 @@ class TestSyncJobModel:
         assert isinstance(job.locations, list)
 
 
+# ── Sync client: Geocoding ─────────────────────────────────────────────
+
+
+@requires_api_key
+class TestSyncGeocoding:
+    def test_geocode_returns_location(self, client: JoboClient):
+        result = client.geocode("San Francisco, CA")
+
+        assert result is not None
+        assert result.input == "San Francisco, CA"
+        assert result.succeeded
+        assert len(result.locations) > 0
+        location = result.locations[0]
+        assert location.display_name
+        assert location.latitude is not None
+        assert location.longitude is not None
+
+    def test_geocode_with_invalid_location(self, client: JoboClient):
+        result = client.geocode("invalidlocationxyz123")
+
+        assert result is not None
+        # May succeed with remote keyword parsing or fail - just check response
+
+
+# ── Sync client: AutoApply ─────────────────────────────────────────────
+
+
+@requires_api_key
+class TestSyncAutoApply:
+    def test_start_auto_apply_session_with_invalid_url(self, client: JoboClient):
+        # Using an invalid URL should return a response
+        response = client.start_auto_apply_session("https://invalid-url-that-does-not-exist.com/jobs/123")
+
+        assert response is not None
+        # The provider detection may fail or succeed - just check response structure
+        assert response.session_id is not None
+
+    def test_end_auto_apply_session_with_invalid_session(self, client: JoboClient):
+        from uuid import uuid4
+
+        result = client.end_auto_apply_session(uuid4())
+
+        # Should return false for non-existent session
+        assert result is False
+
+
 # ── Async client ─────────────────────────────────────────────────────
 
 

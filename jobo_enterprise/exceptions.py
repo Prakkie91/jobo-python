@@ -2,7 +2,10 @@
 
 from __future__ import annotations
 
-from typing import Any, Optional
+from typing import Any, Optional, TYPE_CHECKING
+
+if TYPE_CHECKING:
+    import httpx
 
 
 class JoboError(Exception):
@@ -44,3 +47,33 @@ class JoboValidationError(JoboError):
 
 class JoboServerError(JoboError):
     """Raised when the server returns a 5xx error."""
+
+
+def _handle_error(response: "httpx.Response") -> None:
+    """Raise a typed exception based on the HTTP status code."""
+    status = response.status_code
+    try:
+        body = response.json()
+    except Exception:
+        body = response.text
+
+    detail = body.get("detail", "") if isinstance(body, dict) else str(body)
+    message = f"HTTP {status}: {detail}" if detail else f"HTTP {status}"
+
+    if status == 401:
+        raise JoboAuthenticationError(message, status_code=status, detail=detail, response_body=body)
+    if status == 429:
+        retry_after = response.headers.get("Retry-After")
+        raise JoboRateLimitError(
+            message,
+            status_code=status,
+            detail=detail,
+            response_body=body,
+            retry_after=int(retry_after) if retry_after else None,
+        )
+    if status == 400:
+        raise JoboValidationError(message, status_code=status, detail=detail, response_body=body)
+    if status >= 500:
+        raise JoboServerError(message, status_code=status, detail=detail, response_body=body)
+
+    raise JoboError(message, status_code=status, detail=detail, response_body=body)
